@@ -1,10 +1,14 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_KEY = os.getenv("OPENAI_API_KEY")
+
 from src.image_processor import describe_image
 from src.speech_to_text import transcribe_audio
 from src.text_processor import clean_text_input
 from src.prompt_builder import build_prompt
 from src.story_generator import generate_story
-
-API_KEY = "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"
 
 image_path = "data/sample.jpg"
 audio_path = "data/sample_audio.mp3"
