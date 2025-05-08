@@ -78,18 +78,27 @@ story = generate_story(prompt, API_KEY)
 print("\n===== Generated Story =====\n")
 print(story)
 
-image_prompt = f"{scene_desc} {character_description} {goal_description}"
-print("\nGenerating image for the scene and character...")
+generate_image = input("\nWould you like to generate an image based on the story? (y/n): ").strip().lower()
 
-response = client.images.generate(
-    model="dall-e-3",
-    prompt=image_prompt,
-    n=1,
-    size="1024x1024"
-)
+if generate_image == "y":
+    try:
+        image_prompt = f"{scene_desc} {character_description} {goal_description}"
+        print("\nGenerating image for the scene and character...")
 
-image_url = response.data[0].url
-print(f"\nGenerated Image URL: {image_url}")
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=image_prompt,
+            n=1,
+            size="1024x1024"
+        )
+
+        image_url = response.data[0].url
+        print(f"\nGenerated Image URL: {image_url}")
+
+    except Exception as e:
+        print("\nImage generation failed:", e)
+else:
+    print("\nSkipping image generation.")
 
 save_choice = input("\nWould you like to save this story to continue later? (y/n): ").strip().lower()
 if save_choice == "y":
