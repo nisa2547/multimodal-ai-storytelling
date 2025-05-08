@@ -1,9 +1,11 @@
 from dotenv import load_dotenv
 import os
 import json
+from openai import OpenAI
 
 load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=API_KEY)
 
 if os.path.exists("saved_stories.json"):
     with open("saved_stories.json", "r") as file:
@@ -50,7 +52,7 @@ show_initial_prompt()
 choice = ask_user_choice()
 scene_desc_choice, text_input = handle_choice(choice)
 
-if image_path:
+if choice == "1" and image_path:
     scene_desc = describe_image(image_path, API_KEY)
     print(f"Scene description from image: {scene_desc}")
 else:
@@ -61,27 +63,39 @@ if audio_path:
     print(f"Transcribed speech: {speech_text}")
 else:
     speech_text = ""
-    
-
-if scene_desc_choice and scene_desc_choice != scene_desc:
-    scene_desc = scene_desc_choice
 
 # scene_desc = describe_image(image_path, API_KEY)
 # speech_text = transcribe_audio(audio_path)
 combined_input = clean_text_input(text_input + " " + speech_text)
 character_description, goal_description = extract_character_and_goal(combined_input)
+# if scene_desc_choice and scene_desc_choice != scene_desc:
+#     scene_desc = scene_desc_choice
 prompt = assemble_prompt(scene_desc, character_description, goal_description)
 # prompt = build_prompt(scene_desc, final_input)
+
 story = generate_story(prompt, API_KEY)
 
 print("\n===== Generated Story =====\n")
 print(story)
 
+image_prompt = f"{scene_desc} {character_description} {goal_description}"
+print("\nGenerating image for the scene and character...")
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt=image_prompt,
+    n=1,
+    size="1024x1024"
+)
+
+image_url = response.data[0].url
+print(f"\nGenerated Image URL: {image_url}")
+
 save_choice = input("\nWould you like to save this story to continue later? (y/n): ").strip().lower()
 if save_choice == "y":
     story_name = input("Enter a name for this story: ").strip()
     if story_name in saved_stories:
-        saved_stories[story_name] += "\n" + story  # Append to existing story
+        saved_stories[story_name] += "\n" + story
     else:
         saved_stories[story_name] = story
 
