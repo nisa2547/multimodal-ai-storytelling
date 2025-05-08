@@ -7,32 +7,29 @@ load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
-if os.path.exists("saved_stories.json"):
-    with open("saved_stories.json", "r") as file:
-        saved_stories = json.load(file)
-else:
-    saved_stories = {}
+from src.story_storage import StoryStorage
 
-if saved_stories:
-    print("\nSaved stories available:")
-    for name in saved_stories:
-        print(f"- {name}")
+stories = StoryStorage.list_stories()
+if stories:
+    print("\nAvailable saved stories:")
+    for s in stories:
+        print(f"- {s['story_id']} (Title: {s.get('title', 'Untitled')})")
     load_choice = input("Do you want to load one of these stories? (y/n): ").strip().lower()
 
     if load_choice == "y":
-        story_name = input("Enter the name of the story you want to load: ").strip()
-        story_so_far = saved_stories.get(story_name, "")
-        if story_so_far:
-            print(f"\nLoaded story '{story_name}':\n{story_so_far}")
-        else:
-            print("Story not found. Starting a new one.")
-            story_so_far = ""
+        story_id = input("Enter the story ID to load: ").strip()
+        try:
+            story_storage = StoryStorage.load_story(story_id)
+            print(f"\nLoaded story '{story_id}':")
+            print(story_storage.generate_recap())
+        except FileNotFoundError:
+            print("Story ID not found. Starting a new story.")
+            story_storage = StoryStorage()
     else:
-        story_so_far = ""
+        story_storage = StoryStorage()
 else:
-    print("\nNo saved stories found. Starting fresh.")
-    story_so_far = ""
-
+    print("\nNo saved stories found. Starting a new story.")
+    story_storage = StoryStorage()
 
 from src.image_processor import describe_image
 from src.speech_to_text import transcribe_audio
@@ -100,15 +97,10 @@ if generate_image == "y":
 else:
     print("\nSkipping image generation.")
 
-save_choice = input("\nWould you like to save this story to continue later? (y/n): ").strip().lower()
+save_choice = input("\nWould you like to save this story as a new section? (y/n): ").strip().lower()
 if save_choice == "y":
-    story_name = input("Enter a name for this story: ").strip()
-    if story_name in saved_stories:
-        saved_stories[story_name] += "\n" + story
-    else:
-        saved_stories[story_name] = story
-
-    with open("saved_stories.json", "w") as file:
-        json.dump(saved_stories, file, indent=4)
-
-    print(f"Story saved under the name '{story_name}'!")
+    section_title = input("Enter a title for this section: ").strip() or None
+    section_number = story_storage.add_section(story, section_title)
+    print(f"Story saved as Section {section_number + 1} in '{story_storage.story_id}'.")
+else:
+    print("Story not saved.")
