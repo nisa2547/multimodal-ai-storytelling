@@ -23,7 +23,7 @@ def ask_user_choice():
 
 # Handle Image Upload Interaction - simulation
 def handle_image_upload():
-    print("\n [Image uploaded placeholder]")
+    # print("\n [Image uploaded placeholder]")
     # Image would be sent to multimodal processing
     scene_description = "[Scene description extracted by Multimodal Processing]"
     return scene_description
@@ -51,9 +51,9 @@ def default_scene():
 def handle_choice(choice):
     if choice == "1":
         scene_description = handle_image_upload()
-        if "[Scene description" in scene_description:
-            print("No scene detected from image. Using default scene.")
-            scene_description = default_scene()
+        # if "[Scene description" in scene_description:
+        #     print("No scene detected from image. Using default scene.")
+        #     scene_description = default_scene()
     else:
         scene_description = default_scene()
     text_input = handle_text_input()
