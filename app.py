@@ -2,12 +2,17 @@ from dotenv import load_dotenv
 import os
 import json
 from openai import OpenAI
+from src.story_storage import StoryStorage
+from src.image_processor import describe_image
+from src.speech_to_text import transcribe_audio
+from src.text_processor import clean_text_input
+# from src.prompt_builder import build_prompt
+from src.story_generator import generate_story
+from src.prompt_strategy import extract_character_and_goal, assemble_prompt, show_initial_prompt, ask_user_choice, handle_choice
 
 load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
-
-from src.story_storage import StoryStorage
 
 stories = StoryStorage.list_stories()
 if stories:
@@ -30,13 +35,6 @@ if stories:
 else:
     print("\nNo saved stories found. Starting a new story.")
     story_storage = StoryStorage()
-
-from src.image_processor import describe_image
-from src.speech_to_text import transcribe_audio
-from src.text_processor import clean_text_input
-# from src.prompt_builder import build_prompt
-from src.story_generator import generate_story
-from src.prompt_strategy import extract_character_and_goal, assemble_prompt, show_initial_prompt, ask_user_choice, handle_choice
 
 
 # image_path = "data/sample.jpg"
